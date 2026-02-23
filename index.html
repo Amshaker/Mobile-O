@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile-O: Unified Multimodal Understanding and Generation on Mobile</title>
+    <link rel="icon" type="image/png" href="assets/mobile-o-logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #fafaf9;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #555;
+            --accent: #2563eb;
+            --accent-light: #dbeafe;
+            --accent-dark: #1d4ed8;
+            --border: #e5e5e5;
+            --code-bg: #f5f5f4;
+            --gradient-start: #1e3a5f;
+            --gradient-end: #2563eb;
+            --tag-bg: #f0f4ff;
+            --tag-text: #3b5998;
+            --success: #16a34a;
+            --success-bg: #f0fdf4;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: white;
+            padding: 60px 0 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .hero-title .lightning {
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            font-weight: 400;
+            opacity: 0.9;
+            max-width: 720px;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .hero-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .hero-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            border: 1.5px solid rgba(255,255,255,0.3);
+            color: white;
+            backdrop-filter: blur(4px);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .hero-btn:hover {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-1px);
+        }
+
+        .hero-btn.primary {
+            background: white;
+            color: var(--gradient-start);
+            border-color: white;
+        }
+
+        .hero-btn.primary:hover {
+            background: #f0f0f0;
+            transform: translateY(-1px);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .stat { text-align: left; }
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .stat-label {
+            font-size: 0.82rem;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.92);
+        }
+
+        .nav-inner {
+            display: flex;
+            gap: 6px;
+            padding: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-inner::-webkit-scrollbar { display: none; }
+
+        .nav-link {
+            padding: 14px 18px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* Sections */
+        section {
+            padding: 56px 0;
+        }
+
+        section + section {
+            border-top: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text);
+        }
+
+        .section-title .icon {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+
+        /* Teaser Image */
+        .teaser-img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+
+        /* Capabilities Grid */
+        .capabilities {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .cap-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cap-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+
+        .cap-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .cap-card img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .cap-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Architecture */
+        .arch-img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            margin: 20px 0;
+        }
+
+        .arch-components {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .component {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            border-top: 3px solid var(--accent);
+        }
+
+        .component h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent-dark);
+        }
+
+        .component p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .component .tag {
+            display: inline-block;
+            background: var(--tag-bg);
+            color: var(--tag-text);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        /* Training Pipeline */
+        .pipeline {
+            display: flex;
+            gap: 0;
+            margin-top: 24px;
+            position: relative;
+        }
+
+        .pipeline-step {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 20px;
+            position: relative;
+            text-align: center;
+        }
+
+        .pipeline-step:first-child { border-radius: 10px 0 0 10px; }
+        .pipeline-step:last-child { border-radius: 0 10px 10px 0; }
+        .pipeline-step:not(:last-child) { border-right: none; }
+
+        .pipeline-step .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .pipeline-step h4 {
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .pipeline-step p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .pipeline-step .data-tag {
+            font-size: 0.72rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .pipeline-arrow {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        /* Model Table */
+        .model-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--surface);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+        }
+
+        .model-table th {
+            background: var(--gradient-start);
+            color: white;
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .model-table td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .model-table tr:last-child td { border-bottom: none; }
+
+        .model-table a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .model-table a:hover { text-decoration: underline; }
+
+        /* Supported Tasks */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .task-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        .task-item .task-icon {
+            font-size: 1.4rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .task-item .task-arrow {
+            color: var(--accent);
+            font-weight: 700;
+            margin: 0 4px;
+        }
+
+        /* Qualitative Results */
+        .results-img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+
+        .pdf-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+
+        .pdf-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--code-bg);
+        }
+
+        .pdf-header h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .pdf-header p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .pdf-download {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            border-radius: 7px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .pdf-download:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 16px 0;
+            position: relative;
+        }
+
+        .code-block .comment { color: #64748b; }
+        .code-block .command { color: #7dd3fc; }
+        .code-block .flag { color: #fbbf24; }
+        .code-block .string { color: #86efac; }
+
+        .code-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Citation */
+        .citation-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover { background: var(--accent-dark); }
+
+        /* Footer */
+        .footer {
+            padding: 40px 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.2rem; }
+            .hero-stats { gap: 24px; flex-wrap: wrap; }
+            .capabilities { grid-template-columns: 1fr; }
+            .arch-components { grid-template-columns: 1fr; }
+            .pipeline { flex-direction: column; }
+            .pipeline-step { border-radius: 0 !important; border-right: 1px solid var(--border) !important; border-bottom: none; }
+            .pipeline-step:first-child { border-radius: 10px 10px 0 0 !important; }
+            .pipeline-step:last-child { border-radius: 0 0 10px 10px !important; border-bottom: 1px solid var(--border); }
+            .pipeline-arrow { display: none; }
+            .stat-value { font-size: 1.3rem; }
+            .results-cards { grid-template-columns: 1fr !important; }
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Acknowledgement */
+        .ack-text {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .ack-text a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .ack-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Abstract / description text */
+        .desc-text {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            max-width: 800px;
+        }
+
+        .highlight-box {
+            background: var(--success-bg);
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .highlight-box .icon {
+            color: var(--success);
+            font-size: 1.1rem;
+            margin-top: 2px;
+        }
+
+        .highlight-box p {
+            font-size: 0.9rem;
+            color: #15803d;
+            line-height: 1.6;
+        }
+
+        .highlight-box strong { color: #166534; }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 8px;">
+                    <img src="assets/mobile-o-logo.png" alt="Mobile-O Logo" style="width: 80px; height: 80px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                    <h1 class="hero-title" style="margin-bottom: 0;">Mobile-O</h1>
+                </div>
+                <h2 style="font-family: 'DM Sans', sans-serif; font-size: 1.3rem; font-weight: 600; opacity: 0.92; margin-bottom: 22px; letter-spacing: -0.01em;">Unified Multimodal Understanding and Generation on Mobile Device</h2>
+
+                <div style="margin-bottom: 8px; font-size: 0.95rem; line-height: 1.9; opacity: 0.92;">
+                    <span style="color: #93c5fd;">Abdelrahman Shaker</span><sup>1,∗,†</sup>,
+                    <span style="color: #93c5fd;">Ahmed Heakl</span><sup>1,∗</sup>,
+                    <span style="color: #93c5fd;">Jaseel Muhammad</span><sup>1</sup>,
+                    <span style="color: #93c5fd;">Ritesh Thawkar</span><sup>1</sup>,
+                    <span style="color: #93c5fd;">Omkar Thawakar</span><sup>1</sup>,
+                    <span style="color: #93c5fd;">Senmao Li</span><sup>1</sup>,
+                    <br>
+                    <span style="color: #93c5fd;">Hisham Cholakkal</span><sup>1</sup>,
+                    <span style="color: #93c5fd;">Ian Reid</span><sup>1</sup>,
+                    <span style="color: #93c5fd;">Eric P. Xing</span><sup>1,2</sup>,
+                    <span style="color: #93c5fd;">Salman Khan</span><sup>1,†</sup>,
+                    <span style="color: #93c5fd;">Fahad Shahbaz Khan</span><sup>1,3,†</sup>
+                </div>
+
+                <div style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 4px; line-height: 1.7;">
+                    <sup>1</sup>Mohamed bin Zayed University of Artificial Intelligence &nbsp;
+                    <sup>2</sup>Carnegie Mellon University &nbsp;
+                    <sup>3</sup>Linköping University
+                </div>
+                <div style="font-size: 0.8rem; opacity: 0.6; font-style: italic; margin-bottom: 28px;">
+                    *Equal Contributions &nbsp; †Project Leaders
+                </div>
+            </div>
+
+            <div class="hero-links" style="justify-content: center;">
+                <a href="https://arxiv.org/abs/XXXX.XXXXX" class="hero-btn primary">
+                    <i class="fa-solid fa-file-lines"></i> Paper
+                </a>
+                <a href="https://github.com/Amshaker/Mobile-O" class="hero-btn">
+                    <i class="fa-brands fa-github"></i> Code
+                </a>
+                <a href="https://huggingface.co/collections/Amshaker/mobile-o-models" class="hero-btn">
+                    🤗 Models
+                </a>
+                <a href="https://huggingface.co/collections/Amshaker/mobile-o-datasets" class="hero-btn">
+                    🤗 Datasets
+                </a>
+                <a href="https://mobileo.cvmbzuai.com/" class="hero-btn primary" style="background: #10b981; border-color: #10b981; color: white;">
+                    <i class="fa-solid fa-rocket"></i> Live Demo
+                </a>
+                <a href="https://apps.apple.com/app/mobile-o/id6759238106" class="hero-btn" style="background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.4);">
+                    <i class="fa-brands fa-apple"></i> App Store
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-value">1.6B</div>
+                    <div class="stat-label">Total Parameters</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">~3s</div>
+                    <div class="stat-label">Image Generation (iPhone)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">~0.4s</div>
+                    <div class="stat-label">Visual Understanding (iPhone)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">&lt;2GB</div>
+                    <div class="stat-label">Memory Footprint</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-inner">
+                <a href="#overview" class="nav-link">Overview</a>
+                <a href="#capabilities" class="nav-link">Capabilities</a>
+                <a href="#architecture" class="nav-link">Architecture</a>
+                <a href="#training" class="nav-link">Training</a>
+                <a href="#app" class="nav-link">Mobile App</a>
+                <a href="#models" class="nav-link">Models</a>
+                <a href="#results" class="nav-link">Results</a>
+                <a href="#usage" class="nav-link">Usage</a>
+                <a href="#citation" class="nav-link">Citation</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Overview -->
+    <section id="overview">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-bolt"></i></span>Overview</h2>
+            <p class="desc-text">
+                Mobile-O is designed specifically for mobile and edge deployment. It combines a vision-language model with a diffusion-based image generator in a single unified architecture, enabling real-time multimodal understanding (VQA, OCR, reasoning) and high-quality image generation at 512×512 resolution — all with a memory footprint under 2GB.
+            </p>
+            <div class="highlight-box">
+                <span class="icon"><i class="fa-solid fa-circle-check"></i></span>
+                <p>
+                    <strong>Key result:</strong> Mobile-O generates 512×512 images in ~3 seconds and performs visual understanding in ~0.4 seconds on iPhone, with only 1.6B total parameters.
+                </p>
+            </div>
+            <br>
+            <img src="assets/mobile-o-teaser.jpg" alt="Mobile-O Overview" class="teaser-img fade-in">
+        </div>
+    </section>
+
+    <!-- Capabilities -->
+    <section id="capabilities">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>Capabilities</h2>
+            <div class="capabilities">
+                <div class="cap-card fade-in">
+                    <img src="assets/image_generation.gif" alt="Image Generation">
+                    <h3>🖼️ Image Generation</h3>
+                    <p>High-quality text-to-image synthesis at 512×512 resolution using a lightweight DiT decoder</p>
+                </div>
+                <div class="cap-card fade-in">
+                    <img src="assets/image_understanding.gif" alt="Image Understanding">
+                    <h3>👁️ Image Understanding</h3>
+                    <p>Visual question answering, OCR, and multimodal reasoning powered by FastVLM</p>
+                </div>
+                <div class="cap-card fade-in">
+                    <img src="assets/image_editing.gif" alt="Image Editing">
+                    <h3>✏️ Image Editing</h3>
+                    <p>Instruction-based image editing combining understanding and generation pipelines</p>
+                </div>
+            </div>
+
+            <div class="tasks-grid" style="margin-top: 32px;">
+                <div class="task-item">
+                    <span class="task-icon">💬</span>
+                    Text <span class="task-arrow">→</span> Text
+                </div>
+                <div class="task-item">
+                    <span class="task-icon">🖼️</span>
+                    Image <span class="task-arrow">→</span> Text
+                </div>
+                <div class="task-item">
+                    <span class="task-icon">✨</span>
+                    Text <span class="task-arrow">→</span> Image
+                </div>
+                <div class="task-item">
+                    <span class="task-icon">✏️</span>
+                    Text + Image <span class="task-arrow">→</span> Image
+                </div>
+                <div class="task-item">
+                    <span class="task-icon">🔄</span>
+                    Unified Training
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-cubes"></i></span>Architecture</h2>
+            <img src="assets/mobile-o-arch.jpg" alt="Mobile-O Architecture" class="arch-img fade-in">
+            <p style="text-align: center; font-size: 0.85rem; color: var(--text-secondary); margin-top: -12px; margin-bottom: 20px; font-style: italic;">Overall architecture of Mobile-O: a unified vision–language–diffusion model for on-device multimodal understanding and generation.</p>
+
+            <div class="arch-components">
+                <div class="component fade-in">
+                    <h4>Vision-Language Model</h4>
+                    <p><a href="https://github.com/apple/ml-fastvlm" style="color: var(--accent); text-decoration: none;">FastVLM-0.5B</a> combining FastViT as vision encoder and Qwen2-0.5B as the autoregressive language backbone for multimodal understanding.</p>
+                    <span class="tag">FastViT + Qwen2-0.5B</span>
+                </div>
+                <div class="component fade-in">
+                    <h4>Diffusion Decoder</h4>
+                    <p><a href="https://github.com/NVlabs/Sana" style="color: var(--accent); text-decoration: none;">SANA-600M-512</a>, a lightweight linear DiT-style diffusion transformer paired with a VAE encoder-decoder for text-to-image generation at 512×512.</p>
+                    <span class="tag">Linear DiT + VAE</span>
+                </div>
+                <div class="component fade-in">
+                    <h4>Mobile Conditioning Projector</h4>
+                    <p>A novel lightweight connector (~2.4M params) bridging VLM and diffusion decoder using layerwise feature fusion with temperature-scaled learnable weights.</p>
+                    <span class="tag">~2.4M Parameters</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Training -->
+    <section id="training">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-graduation-cap"></i></span>Training Pipeline</h2>
+            <div class="pipeline">
+                <div class="pipeline-step fade-in">
+                    <span class="step-num">1</span>
+                    <h4>Cross-Modal Alignment</h4>
+                    <p>Pretrain DiT and MCP on 9M text-image pairs. Visual encoders, LLM, and VAE are frozen.</p>
+                    <span class="data-tag"><a href="https://huggingface.co/datasets/Amshaker/Mobile-O-Pre-Train" style="color: inherit; text-decoration: none;">📦 9M pairs</a></span>
+                    <span class="pipeline-arrow">→</span>
+                </div>
+                <div class="pipeline-step fade-in">
+                    <span class="step-num">2</span>
+                    <h4>Supervised Fine-tuning</h4>
+                    <p>Finetune DiT and MCP on ~105K curated prompt-image pairs from BLIP3o + ShareGPT-4o.</p>
+                    <span class="data-tag"><a href="https://huggingface.co/datasets/Amshaker/Mobile-O-SFT" style="color: inherit; text-decoration: none;">📦 ~105K pairs</a></span>
+                    <span class="pipeline-arrow">→</span>
+                </div>
+                <div class="pipeline-step fade-in">
+                    <span class="step-num">3</span>
+                    <h4>Unified Post-Training</h4>
+                    <p>Post-train DiT, MCP, LLM (LoRA), and visual encoder on ~105K quadruplet samples.</p>
+                    <span class="data-tag"><a href="https://huggingface.co/datasets/Amshaker/Mobile-O-SFT" style="color: inherit; text-decoration: none;">📦 ~105K quadruplets</a></span>
+                </div>
+            </div>
+
+            <img src="assets/training_figure.jpg" alt="Training Pipeline" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); margin-top: 32px;" class="fade-in">
+            <p style="text-align: center; font-size: 0.85rem; color: var(--text-secondary); margin-top: 12px; font-style: italic;">Unified multimodal post-training: jointly optimizing image generation and visual understanding via a multi-task objective.</p>
+        </div>
+    </section>
+
+    <!-- Mobile App -->
+    <section id="app">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-mobile-screen-button"></i></span>Mobile App</h2>
+            <p class="desc-text">
+                Mobile-O runs entirely on-device with no cloud dependency. We release the <strong>full source code</strong> of the iOS app along with optimized <strong>MLX</strong> and <strong>CoreML</strong> model components.
+            </p>
+
+            <div style="text-align: center; margin: 28px 0;">
+                <a href="https://apps.apple.com/app/XXXXXXXXXX" target="_blank" style="display: inline-block;">
+                    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" style="height: 52px;">
+                </a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 500px; margin: 0 auto 28px;">
+                <a href="https://github.com/Amshaker/Mobile-O/tree/main/Mobile-O-App" target="_blank" style="display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; text-decoration: none; color: var(--text); transition: transform 0.2s, box-shadow 0.2s;">
+                    <span style="font-size: 1.3rem;">📱</span>
+                    <div>
+                        <div style="font-size: 0.88rem; font-weight: 600;">iOS App Source Code</div>
+                        <div style="font-size: 0.78rem; color: var(--accent);">Mobile-O-App</div>
+                    </div>
+                </a>
+                <a href="https://huggingface.co/Amshaker/Mobile-O-0.5B-iOS" target="_blank" style="display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; text-decoration: none; color: var(--text); transition: transform 0.2s, box-shadow 0.2s;">
+                    <span style="font-size: 1.3rem;">🧩</span>
+                    <div>
+                        <div style="font-size: 0.88rem; font-weight: 600;">MLX & CoreML Models</div>
+                        <div style="font-size: 0.78rem; color: var(--accent);">🤗 HuggingFace</div>
+                    </div>
+                </a>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+                <div style="text-align: center;">
+                    <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent);">⚡ ~3s</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Image Generation</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent);">👁️ ~0.4s</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Visual Understanding</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent);">💾 <2GB</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Memory Footprint</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Models -->
+    <section id="models">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-box-open"></i></span>Model Checkpoints</h2>
+            <table class="model-table fade-in">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Total Params</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Mobile-O-0.5B</strong></td>
+                        <td>1.6B</td>
+                        <td><a href="https://huggingface.co/Amshaker/Mobile-O-0.5B">🤗 HuggingFace</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mobile-O-1.5B</strong></td>
+                        <td>3.5B</td>
+                        <td><a href="https://huggingface.co/Amshaker/Mobile-O-1.5B">🤗 HuggingFace</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mobile-O-0.5B-iOS</strong></td>
+                        <td>iOS Components</td>
+                        <td><a href="https://huggingface.co/Amshaker/Mobile-O-0.5B-iOS">🤗 HuggingFace</a></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-top: 40px; margin-bottom: 4px;">📦 Training Datasets</h3>
+            <table class="model-table fade-in">
+                <thead>
+                    <tr>
+                        <th>Stage</th>
+                        <th>Description</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Pre-training</strong></td>
+                        <td>9M text-image pairs (JourneyDB+BLIP3o-Pretrain-Short-Caption)</td>
+                        <td><a href="https://huggingface.co/datasets/Amshaker/Mobile-O-Pre-Train">🤗 HuggingFace</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>SFT</strong></td>
+                        <td>~105K curated prompt-image pairs</td>
+                        <td><a href="https://huggingface.co/datasets/Amshaker/Mobile-O-SFT">🤗 HuggingFace</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Post-training</strong></td>
+                        <td>~105K unified quadruplet samples</td>
+                        <td><a href="https://huggingface.co/datasets/Amshaker/Mobile-O-Post-Train">🤗 HuggingFace</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Qualitative Results -->
+    <section id="results">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-images"></i></span>Qualitative Results</h2>
+
+            <div class="pdf-section fade-in">
+                <div class="pdf-header">
+                    <span style="font-size: 1.3rem;">✨</span>
+                    <div>
+                        <h3>Mobile-O Samples</h3>
+                        <p>Qualitative examples of understanding, generation, and editing from Mobile-O</p>
+                    </div>
+                </div>
+                <div style="padding: 16px;">
+                    <img src="assets/mobile-o-qualitative.jpg" alt="Qualitative Results" style="width: 100%; border-radius: 8px;">
+                </div>
+            </div>
+
+            <div class="pdf-section fade-in" style="margin-top: 40px;">
+                <div class="pdf-header">
+                    <span style="font-size: 1.3rem;">🖼️</span>
+                    <div>
+                        <h3>Generation Results</h3>
+                        <p>Extended qualitative generation samples from Mobile-O</p>
+                    </div>
+                </div>
+                <div style="padding: 16px;">
+                    <img src="assets/suppl_qualitative_generation.png" alt="Generation Results" style="width: 100%; border-radius: 8px;">
+                </div>
+            </div>
+
+            <div class="pdf-section fade-in" style="margin-top: 28px;">
+                <div class="pdf-header">
+                    <span style="font-size: 1.3rem;">⚔️</span>
+                    <div>
+                        <h3>Generation Comparison</h3>
+                        <p>Side-by-side generation comparison with other models</p>
+                    </div>
+                </div>
+                <div style="padding: 16px;">
+                    <img src="assets/suppl_generation_comparison.png" alt="Generation Comparison" style="width: 100%; border-radius: 8px;">
+                </div>
+            </div>
+
+            <div class="pdf-section fade-in" style="margin-top: 28px;">
+                <div class="pdf-header">
+                    <span style="font-size: 1.3rem;">🔍</span>
+                    <div>
+                        <h3>Understanding Comparison</h3>
+                        <p>Side-by-side understanding comparison with other models</p>
+                    </div>
+                </div>
+                <div style="padding: 16px;">
+                    <img src="assets/suppl_qualitative_understanding_comparison.png" alt="Understanding Comparison" style="width: 100%; border-radius: 8px;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage -->
+    <section id="usage">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-terminal"></i></span>Quick Start</h2>
+
+            <p class="code-label">Install</p>
+            <div class="code-block">
+<span class="command">conda</span> create -n mobileo python=3.12 -y
+<span class="command">conda</span> activate mobileo
+<span class="command">pip</span> install -r requirements.txt
+            </div>
+
+            <p class="code-label">Download Checkpoint</p>
+            <div class="code-block">
+<span class="command">python</span> -c <span class="string">"from huggingface_hub import snapshot_download; print(snapshot_download(repo_id='Amshaker/Mobile-O-0.5B', repo_type='model', local_dir='checkpoints', allow_patterns=['final_merged_model_23620/*']))"</span>
+            </div>
+
+            <p class="code-label">Image Understanding</p>
+            <div class="code-block">
+<span class="command">python</span> infer_und.py <span class="flag">--model_path</span> /path/to/checkpoint/ <span class="flag">--image_path</span> assets/cute_cat.png <span class="flag">--prompt</span> <span class="string">"What is in the image?"</span>
+            </div>
+
+            <p class="code-label">Image Generation</p>
+            <div class="code-block">
+<span class="command">python</span> infer_gen.py <span class="flag">--model_path</span> /path/to/checkpoint/ <span class="flag">--prompt</span> <span class="string">"A vibrant tropical rainforest scene with a scarlet macaw perched on a moss-covered branch"</span>
+            </div>
+
+            <p class="code-label">Image Editing</p>
+            <div class="code-block">
+<span class="command">python</span> infer_edit.py <span class="flag">--model_path</span> /path/to/checkpoint/ <span class="flag">--image_path</span> assets/cute_cat.png <span class="flag">--prompt</span> <span class="string">"Make the cat wear a hat"</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Citation -->
+    <section id="citation">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-quote-left"></i></span>Citation</h2>
+            <div class="citation-box">
+                <button class="copy-btn" onclick="copyCitation()">
+                    <i class="fa-regular fa-copy"></i> Copy
+                </button>
+<pre id="citation-text">@article{shaker2026mobileo,
+  title={Mobile-O: Unified Multimodal Understanding and Generation on Mobile Device},
+  author={Shaker, Abdelrahman and Heakl, Ahmed and Muhammad, Jaseel and Thawkar, Ritesh and Thawakar, Omkar and Li, Senmao and Cholakkal, Hisham and Reid, Ian and Xing, Eric P. and Khan, Salman and Khan, Fahad Shahbaz},
+  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  year={2026}
+}</pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Acknowledgements -->
+    <section id="acknowledgements">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-heart"></i></span>Acknowledgements</h2>
+            <p class="ack-text">
+                This repo is partially built upon <a href="https://github.com/JiuhaiChen/BLIP3o">BLIP3o</a>. Thanks to all the contributors for their great efforts.
+            </p>
+        </div>
+    </section>
+
+    <!-- License -->
+    <section id="license">
+        <div class="container">
+            <h2 class="section-title"><span class="icon"><i class="fa-solid fa-scale-balanced"></i></span>License</h2>
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; display: flex; align-items: flex-start; gap: 16px;">
+                <span style="font-size: 1.5rem;">⚠️</span>
+                <div>
+                    <p style="font-size: 0.92rem; color: var(--text); line-height: 1.7; margin-bottom: 8px;">
+                        This project is released under a <strong>non-commercial research license</strong>. The code, models, datasets, and app are intended <strong>solely for academic and research purposes</strong>. Please refer to the <a href="LICENSE" style="color: var(--accent); text-decoration: none; font-weight: 600;">LICENSE</a> file for full details.
+                    </p>
+   
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <p>Mobile-O &copy; 2026 · <a href="https://amshaker.github.io">Abdelrahman Shaker</a> · <a href="https://mbzuai.ac.ae">MBZUAI</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Intersection Observer for fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Copy citation
+        function copyCitation() {
+            const text = document.getElementById('citation-text').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
