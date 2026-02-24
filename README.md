@@ -5,7 +5,7 @@
 </h1>
 
 <p>
-<a href="https://arxiv.org/abs/XXXX.XXXXX"><img src="https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b.svg" alt="arXiv"></a>
+<a href="https://arxiv.org/abs/2602.20161"><img src="https://img.shields.io/badge/arXiv-2602.20161-b31b1b.svg" alt="arXiv"></a>
 <a href="https://mobileo.cvmbzuai.com/"><img src="https://img.shields.io/badge/🚀-Live_Demo-10b981.svg" alt="Demo"></a>
 <a href="https://amshaker.github.io/Mobile-O/"><img src="https://img.shields.io/badge/🌐-Project_Page-2563eb.svg" alt="Project Page"></a>
 <a href="https://huggingface.co/collections/Amshaker/mobile-o-models"><img src="https://img.shields.io/badge/🤗-Models-yellow.svg" alt="Models"></a>
@@ -15,7 +15,7 @@
 </p>
 
 
-**[Abdelrahman Shaker](https://amshaker.github.io)<sup>1,∗,†</sup>, [Ahmed Heakl](https://github.com/ahmedheakl)<sup>1,∗</sup>, [Jaseel Muhammad](https://www.linkedin.com/in/jaseelmkk)<sup>1</sup>,<br> [Ritesh Thawkar](https://scholar.google.com/citations?user=9-2AnjQAAAAJ&hl=en)<sup>1</sup>, [Omkar Thawakar](https://omkarthawakar.github.io/)<sup>1</sup>, [Senmao Li](https://scholar.google.com/citations?user=F96SDKwAAAAJ&hl=en)<sup>1</sup>, [Hisham Cholakkal](https://scholar.google.com/citations?user=bZ3YBRcAAAAJ&hl=en)<sup>1</sup>,<br>  [Ian Reid](https://scholar.google.com/citations?user=ATkNLcQAAAAJ&hl=en)<sup>1</sup>, [Eric P. Xing](https://scholar.google.com/citations?user=5pKTRxEAAAAJ&hl=en)<sup>1,2</sup>, [Salman Khan](https://scholar.google.com/citations?user=M59O9lkAAAAJ&hl=en)<sup>1,†</sup>, [Fahad Shahbaz Khan](https://scholar.google.es/citations?user=zvaeYnUAAAAJ)<sup>1,3,†</sup>**
+**[Abdelrahman Shaker](https://amshaker.github.io)<sup>1,∗,†</sup>, [Ahmed Heakl](https://ahmedheakl.github.io/)<sup>1,∗</sup>, [Jaseel Muhammad](https://www.linkedin.com/in/jaseelmkk)<sup>1</sup>,<br> [Ritesh Thawkar](https://scholar.google.com/citations?user=9-2AnjQAAAAJ&hl=en)<sup>1</sup>, [Omkar Thawakar](https://omkarthawakar.github.io/)<sup>1</sup>, [Senmao Li](https://scholar.google.com/citations?user=F96SDKwAAAAJ&hl=en)<sup>1</sup>, [Hisham Cholakkal](https://scholar.google.com/citations?user=bZ3YBRcAAAAJ&hl=en)<sup>1</sup>,<br>  [Ian Reid](https://scholar.google.com/citations?user=ATkNLcQAAAAJ&hl=en)<sup>1</sup>, [Eric P. Xing](https://scholar.google.com/citations?user=5pKTRxEAAAAJ&hl=en)<sup>1,2</sup>, [Salman Khan](https://scholar.google.com/citations?user=M59O9lkAAAAJ&hl=en)<sup>1,†</sup>, [Fahad Shahbaz Khan](https://scholar.google.es/citations?user=zvaeYnUAAAAJ)<sup>1,3,†</sup>**
 
 
 
@@ -29,7 +29,8 @@
 
 ## 📣 Announcement
 
-- **Mobile-O** is now fully released! This includes models, training and evaluation code, inference scripts, and the complete mobile app.
+
+- **Mobile-O** is now fully released! This includes models, training and evaluation code, inference scripts, paper, and the complete mobile app.
 
 ---
 ## 📌 Overview
@@ -261,7 +262,7 @@ If you find Mobile-O useful in your research, please consider citing:
 @article{shaker2026mobileo,
   title={Mobile-O: Unified Multimodal Understanding and Generation on Mobile Device},
   author={Shaker, Abdelrahman and Heakl, Ahmed and Muhammad, Jaseel and Thawkar, Ritesh and Thawakar, Omkar and Li, Senmao and Cholakkal, Hisham and Reid, Ian and Xing, Eric P. and Khan, Salman and Khan, Fahad Shahbaz},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  journal={arXiv preprint arXiv:2602.20161},
   year={2026}
 }
 ```
@@ -281,5 +282,5 @@ This repo is partially built upon [BLIP3o](https://github.com/JiuhaiChen/BLIP3o)
 <div align="center">
   <a href="https://amshaker.github.io/Mobile-O/">🌐 Project Page</a> &nbsp;•&nbsp;
   <a href="https://mobileo.cvmbzuai.com/">🚀 Live Demo</a> &nbsp;•&nbsp;
-  <a href="https://arxiv.org/abs/XXXX.XXXXX">📄 Paper</a>
+  <a href="https://arxiv.org/abs/2602.20161">📄 Paper</a>
 </div>
