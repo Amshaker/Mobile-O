@@ -177,7 +177,7 @@ class LlavaMetaForCausalLM(ABC):
     
     def visual(self, pixel_values: torch.Tensor) -> torch.Tensor:
         image_features = self.get_model().get_vision_tower()(pixel_values)
-        image_features = self.get_model().mm_projector(image_features)
+        image_features = self.get_model().mm_projector(image_features.to(self.get_model().mm_projector[0].weight.dtype))
         return image_features
 
 
