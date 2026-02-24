@@ -16,7 +16,7 @@ image_processor = model.get_vision_tower().image_processor
 
 
 def infer(prompt):
-    qs = prompt
+    qs = "Please generate image based on the following caption: " + prompt
     conv = conv_templates["qwen_2"].copy()
     conv.append_message(conv.roles[0], qs)
     conv.append_message(conv.roles[1], None)
