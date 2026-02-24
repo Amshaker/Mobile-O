@@ -142,7 +142,7 @@ python -c "from huggingface_hub import snapshot_download; print(snapshot_downloa
 ### 1. Image Understanding
 
 ```bash
-python infer_und.py \
+python infer_image_understanding.py \
     --model_path /HF_model/checkpoint/path/ \
     --image_path assets/cute_cat.png \
     --prompt "What is in the image?"
@@ -151,7 +151,7 @@ python infer_und.py \
 ### 2. Image Generation
 
 ```bash
-python infer_gen.py \
+python infer_image_generation.py \
     --model_path /HF_model/checkpoint/path/ \
     --prompt "A vibrant tropical rainforest scene with a scarlet macaw perched on a moss-covered branch"
 ```
@@ -159,7 +159,7 @@ python infer_gen.py \
 ### 3. Image Editing
 
 ```bash
-python infer_edit.py \
+python infer_image_editing.py \
     --model_path /HF_model/checkpoint/path/ \
     --image_path assets/cute_cat.png \
     --prompt "Make the cat wear a hat"
