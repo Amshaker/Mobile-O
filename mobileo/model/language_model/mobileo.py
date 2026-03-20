@@ -129,10 +129,6 @@ class mobileoFastForCausalLM(Qwen2ForCausalLM, LlavaMetaForCausalLM):
             timesteps, latents.device, n_dim=latents.ndim, dtype=latents.dtype
         )
 
-        vae = self.get_model().get_sana_vae()
-        original_latents = (
-            vae.encode(und_image.to(vae.device)).latent * vae.config.scaling_factor
-        )
         noise = torch.randn_like(latents, device=latents.device)
         noisy_latents = (1.0 - sigmas) * latents + sigmas * noise
         diffusion_pred = (
