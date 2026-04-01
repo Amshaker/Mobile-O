@@ -10,6 +10,7 @@ torchrun --nproc_per_node=1 mobileo/train/train.py \
     --deepspeed ./deepspeed_scripts/zero3.json \
     --diffusion_name_or_path Efficient-Large-Model/Sana_1600M_512px_diffusers \
     --vlm_num_layers 4 \
+    --is_train True \
     --model_name_or_path $OUTPUT_FOLDER/llava-fastvithd_1.5b_stage3 \
     --version qwen \
     --data_type mix \
