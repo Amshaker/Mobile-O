@@ -377,104 +377,135 @@ def get_closest_ratio(height: float, width: float, ratio: List[float]):
     return ratio, float(closest_ratio)
 
 
+def _load_single_tar(tar_file: str):
+    """
+    Load and process a single tar file. Runs in an independent process.
+    """
+    try:
+        # Load within a single process, num_proc=1 to prevent conflicts with the outer process pool
+        ds = load_dataset("webdataset", data_files=[tar_file], split="train", num_proc=1)
+
+        if "jpg" in ds.column_names:
+            key_name = "jpg"
+        elif "png" in ds.column_names:
+            key_name = "png"
+        elif "image" in ds.column_names:
+            key_name = None  # Already named image, no need to rename
+        else:
+            print(f"ERROR: No image column found in {tar_file}! Available columns: {ds.column_names}")
+            return None
+        # Unify image column name
+        if key_name:
+            ds = ds.rename_column(key_name, "image")
+
+        # Remove unnecessary columns at the tar level to save memory and avoid schema conflicts during concatenate
+        cols_to_keep = {"image", "txt", "id"}
+        cols_to_remove = [col for col in ds.column_names if col not in cols_to_keep]
+        ds = ds.remove_columns(cols_to_remove)
+
+        # Add metadata columns
+        ds = ds.add_column("type", len(ds) * ["T2I"])
+        ds = ds.add_column("image_path", len(ds) * [None])
+        return ds
+    except Exception as e:
+        print(f"ERROR: Read tar {tar_file} failed! Error: {e}")
+        return None
+
+
+def _load_webdatasets(imge_folders_str: str, max_workers=8):
+    from pathlib import Path
+    from multiprocessing import Pool
+
+    image_folders = [Path(folder.strip()) for folder in imge_folders_str.split(",")]
+
+    all_tar_files = []
+
+    # Step 1: Traverse all root directories and recursively collect all tar files using rglob
+    print(f"\n{'=' * 60}")
+    print("Collecting all tar files recursively...")
+
+    for folder in image_folders:
+        if not folder.exists() or not folder.is_dir():
+            print(f"Warning: Directory not found or is not a dir: {folder}")
+            continue
+
+        tars = [str(p) for p in folder.rglob("*.tar") if p.is_file()]
+        if tars:
+            all_tar_files.extend(tars)
+            print(f"  → Found {len(tars)} tar files in {folder}")
+        else:
+            print(f"  → Warning: No tar files found in {folder}")
+
+    if not all_tar_files:
+        raise ValueError("No tar files found in any of the provided folders!")
+
+    print(f"{'=' * 60}\nTotal {len(all_tar_files)} tar files to load with {max_workers} workers.")
+
+    valid_datasets = []
+
+    # Step 2: Use a process pool to uniformly load all collected tar files in parallel
+    with Pool(processes=max_workers) as pool:
+        # imap_unordered is the fastest for stateless concatenation
+        for i, ds in enumerate(pool.imap_unordered(_load_single_tar, all_tar_files), 1):
+            if ds is not None:
+                valid_datasets.append(ds)
+
+            # Print progress in real-time
+            if i % 10 == 0 or i == len(all_tar_files):
+                print(f"  → Processed {i}/{len(all_tar_files)} files")
+    if not valid_datasets:
+        raise ValueError("All tar files failed to load!")
+
+    # Step 3: Perform one final Concatenate
+    print(f"\n{'=' * 60}")
+    print(f"Final Concatenation of {len(valid_datasets)} datasets...")
+
+    # Concatenate all datasets
+    if len(valid_datasets) > 1:
+        print(f"\n{'=' * 60}")
+        print(f"Concatenating {len(valid_datasets)} datasets...")
+        print(f"{'=' * 60}")
+
+        # Verify all datasets have the same columns before concatenating
+        first_columns = set(valid_datasets[0].column_names)
+        for i, ds in enumerate(valid_datasets):
+            print(f"  Dataset {i + 1}: {len(ds)} samples, columns: {ds.column_names}")
+            if set(ds.column_names) != first_columns:
+                print("ERROR: Column mismatch detected!")
+                print(f"  Expected: {first_columns}")
+                print(f"  Got: {set(ds.column_names)}")
+                raise ValueError(
+                    f"Dataset {i + 1} has different columns than dataset 0!"
+                )
+
+        dataset = concatenate_datasets(valid_datasets)
+        print(f"Successfully concatenated: {len(dataset)} total samples")
+    else:
+        dataset = valid_datasets[0]
+        print(f"Single dataset loaded: {len(dataset)} samples")
+
+    return dataset
+
 
 class LazySupervisedMixDataset(Dataset):
     def __init__(
-            self,
-            data_path: str,
-            tokenizer: transformers.PreTrainedTokenizer,
-            data_args: DataArguments,
+        self,
+        data_path: str,
+        tokenizer: transformers.PreTrainedTokenizer,
+        data_args: DataArguments,
     ):
         super(LazySupervisedMixDataset, self).__init__()
-    
+
         self.data_args = data_args
         list_data_dict = []
-    
-        ###################################### text to image ####################################### 
-    
-        # Split image folders
-        image_folders = self.data_args.image_folder.split(',')
-        image_folders = [folder.strip() for folder in image_folders]
-    
-        # CRITICAL FIX: Process each folder separately, then concatenate
-        for folder_idx, folder in enumerate(image_folders):
-            print(f"\n{'=' * 60}")
-            print(f"Processing folder {folder_idx + 1}/{len(image_folders)}: {folder}")
-            print(f"{'=' * 60}")
-    
-            if not os.path.exists(folder):
-                print(f"Warning: Directory not found: {folder}")
-                continue
-    
-            # Get tar files for this specific folder
-            tar_files = glob.glob(os.path.join(folder, "*.tar"))
-            if not tar_files:
-                print(f"Warning: No tar files found in {folder}")
-                continue
-    
-            print(f"Found {len(tar_files)} tar files in {folder}")
-    
-            # Load dataset for THIS folder only
-            train_dataset = load_dataset("webdataset", data_files=tar_files, split="train", num_proc=1)
-            print(f"Loaded {len(train_dataset)} samples from {folder}")
-            print(f"Columns before processing: {train_dataset.column_names}")
-    
-            # Handle image column naming - process based on what exists in THIS dataset
-            if "jpg" in train_dataset.column_names:
-                print(f"  → Renaming 'jpg' to 'image'")
-                train_dataset = train_dataset.rename_column("jpg", "image")
-            elif "png" in train_dataset.column_names:
-                print(f"  → Renaming 'png' to 'image'")
-                train_dataset = train_dataset.rename_column("png", "image")
-            elif "image" not in train_dataset.column_names:
-                print(f"ERROR: No image column found! Available columns: {train_dataset.column_names}")
-                continue
-    
-            # Add metadata columns
-            train_dataset = train_dataset.add_column('type', len(train_dataset) * ['T2I'])
-            train_dataset = train_dataset.add_column('image_path', len(train_dataset) * [None])
-    
-            # Remove unnecessary columns
-            train_dataset = train_dataset.remove_columns([
-                col for col in train_dataset.column_names
-                if col not in ["image", "txt", "type", "image_path"]
-            ])
-    
-            print(f"  → After processing: {len(train_dataset)} samples")
-            print(f"  → Final columns: {train_dataset.column_names}")
-    
-            # Append this processed dataset
-            list_data_dict.append(train_dataset)
-    
-        # Check if we loaded any datasets
-        if not list_data_dict:
-            raise ValueError("No datasets were successfully loaded from any folder!")
-    
-        # Concatenate all datasets
-        if len(list_data_dict) > 1:
-            print(f"\n{'=' * 60}")
-            print(f"Concatenating {len(list_data_dict)} datasets...")
-            print(f"{'=' * 60}")
-    
-            # Verify all datasets have the same columns before concatenating
-            first_columns = set(list_data_dict[0].column_names)
-            for i, ds in enumerate(list_data_dict):
-                print(f"  Dataset {i + 1}: {len(ds)} samples, columns: {ds.column_names}")
-                if set(ds.column_names) != first_columns:
-                    print(f"ERROR: Column mismatch detected!")
-                    print(f"  Expected: {first_columns}")
-                    print(f"  Got: {set(ds.column_names)}")
-                    raise ValueError(f"Dataset {i + 1} has different columns than dataset 0!")
-    
-            list_data_dict = concatenate_datasets(list_data_dict)
-            print(f"Successfully concatenated: {len(list_data_dict)} total samples")
-        else:
-            list_data_dict = list_data_dict[0]
-            print(f"Single dataset loaded: {len(list_data_dict)} samples")
-    
+
+        ###################################### text to image #######################################
+
+        list_data_dict = _load_webdatasets(self.data_args.image_folder, max_workers=8)
+
         # Shuffle after concatenation
         list_data_dict = list_data_dict.shuffle(seed=42)
-    
+
         rank0_print(f"Total number of training instances: {len(list_data_dict)}")
         self.tokenizer = tokenizer
         self.tokenizer.model_max_length = self.data_args.tokenizer_max_length
