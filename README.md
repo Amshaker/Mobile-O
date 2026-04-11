@@ -29,6 +29,8 @@
 
 ## 📣 Announcement
 
+- 🎉 **Mobile-O** has been accepted at the **CVPR 2026 Demo track**! Join us in Denver (Jun 3–7, 2026) to experience Mobile-O running live on-device. Feel free to stop by, try it hands-on, and chat with us about the research. We would love to hear your thoughts!
+
 - **Mobile-O Live Demo**: Interactively explore the model’s capabilities
 <a href="https://mobileo.cvmbzuai.com/"><img src="https://img.shields.io/badge/🚀-Live_Demo-10b981.svg" alt="Mobile-O Online Demo"></a>
 - **Mobile-O** is now fully released! This includes models, training and evaluation code, inference scripts, paper, and the complete mobile app.
